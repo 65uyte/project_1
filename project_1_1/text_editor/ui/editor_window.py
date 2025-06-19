@@ -14,6 +14,8 @@ class EditorWindow:
         self.text.pack(expand=1, fill="both")
 
         self.text.bind("<KeyRelease>", self.on_text_change)
+        self.text.bind("<Control-c>", lambda e: (self.copy(), "break"))
+        self.text.bind("<Control-v>", lambda e: (self.paste(), "break"))
 
         menu = tk.Menu(root)
         root.config(menu=menu)
