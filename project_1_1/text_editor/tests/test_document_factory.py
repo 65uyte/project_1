@@ -22,7 +22,7 @@ def test_factory_documents_are_independent():
     doc1 = factory.create_document("first")
     doc2 = factory.create_document("second")
     doc1.content = "changed"
-    assert doc2.content == "second"  # doc2 не змінився
+    assert doc2.content == "second"
 
 def test_factory_with_long_content():
     factory = DocumentFactory()

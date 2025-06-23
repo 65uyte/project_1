@@ -192,11 +192,10 @@ class UndoRedoManager:
             command.execute()
             self._undo_stack.append(command)
 
-# Використання
 manager = UndoRedoManager()
 cmd = SetTextCommand(document, "New text")
 manager.execute(cmd)
-manager.undo()  # Повертає попередній стан
+manager.undo()
 ```
 
 **Переваги**:
@@ -215,11 +214,9 @@ class DeleteTextCommand(Command):
         self.deleted_text = document.content[start:end]
 
     def execute(self):
-        # Видалення тексту
         pass
 
     def undo(self):
-        # Відновлення видаленого тексту
         pass
 ```
 
@@ -256,7 +253,7 @@ class Document:
     @content.setter
     def content(self, value: str):
         self._content = value
-        self.notify()  # Автоматично повідомляє всіх observers
+        self.notify()
 
 # document/observer.py
 class DocumentObserver:
@@ -267,7 +264,7 @@ class DocumentObserver:
 doc = Document()
 observer = DocumentObserver()
 doc.attach(observer)
-doc.content = "New content"  # Автоматично викликає observer.update()
+doc.content = "New content"
 ```
 
 **Переваги**:
@@ -341,17 +338,17 @@ def copy(self):
     try:
         selected = self.text.get(tk.SEL_FIRST, tk.SEL_LAST)
         self.root.clipboard_clear()
-        self.root.clipboard_append(selected)  # Системний clipboard
+        self.root.clipboard_append(selected) 
     except tk.TclError:
-        pass  # Нічого не виділено
+        pass
 
 def paste(self):
     try:
-        clipboard_text = self.root.clipboard_get()  # Системний clipboard
+        clipboard_text = self.root.clipboard_get() 
         self.text.insert(tk.INSERT, clipboard_text)
         self.on_text_change()
     except tk.TclError:
-        pass  # Буфер порожній
+        pass
 ```
 
 ### 2. Undo/Redo для змін тексту
@@ -363,11 +360,10 @@ def paste(self):
 # ui/editor_window.py
 def on_text_change(self, event=None):
     content = self.text.get("1.0", tk.END)[:-1]
-    self.facade.set_content(content)  # Пряма зміна без команди
-
+    self.facade.set_content(content)
 # facade/editor_facade.py
 def undo(self):
-    self.undo_redo.undo()  # Нічого не робить, бо немає команд
+    self.undo_redo.undo()
 ```
 
 **Після рефакторингу:**

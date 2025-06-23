@@ -19,11 +19,9 @@ class EditorFacade:
         return self.document.content
 
     def copy(self, text: str):
-        # Тепер ця функція не потрібна, бо копіювання через системний clipboard
         pass
 
     def paste(self):
-        # Тепер ця функція не потрібна, бо вставка через системний clipboard
         pass
 
     def undo(self):

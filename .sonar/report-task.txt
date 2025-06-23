@@ -1,0 +1,7 @@
+organization=65uyte
+projectKey=65uyte_project_1
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.64611
+dashboardUrl=https://sonarcloud.io/dashboard?id=65uyte_project_1
+ceTaskId=AZeH_ztsrv-wQfMuKk8j
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZeH_ztsrv-wQfMuKk8j

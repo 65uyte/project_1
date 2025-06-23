@@ -15,7 +15,6 @@ def test_facade_new_document():
 def test_facade_undo_redo():
     facade = EditorFacade()
     
-    # Реєструємо команди вручну для тестування
     facade.undo_redo.execute(SetTextCommand(facade.document, "one"))
     facade.undo_redo.execute(SetTextCommand(facade.document, "two"))
     facade.undo_redo.execute(SetTextCommand(facade.document, "three"))

@@ -13,5 +13,3 @@ sequenceDiagram
     Command->>Document: change_state()
     Document-->>UI: notify_observers()
 ```
-
-> Діаграма буде деталізована після реалізації основних класів. 
