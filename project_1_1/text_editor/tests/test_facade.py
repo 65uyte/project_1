@@ -81,4 +81,12 @@ def test_facade_no_save_callback():
     facade = EditorFacade()  # Без callback
     facade.set_content("Test")
     # Не має викликати помилку
-    assert facade.get_content() == "Test" 
+    assert facade.get_content() == "Test"
+
+def test_facade_copy_unimplemented():
+    facade = EditorFacade()
+    assert facade.copy("text") is None
+
+def test_facade_paste_unimplemented():
+    facade = EditorFacade()
+    assert facade.paste() is None 

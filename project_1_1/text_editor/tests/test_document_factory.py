@@ -34,4 +34,12 @@ def test_factory_with_special_characters():
     factory = DocumentFactory()
     special_content = "Special chars: !@#$%^&*()_+-=[]{}|;':\",./<>?"
     doc = factory.create_document(special_content)
-    assert doc.content == special_content 
+    assert doc.content == special_content
+
+def test_factory_unsupported_filetype():
+    factory = DocumentFactory()
+    try:
+        factory.create_document("text", ".unsupported")
+        assert False, "ValueError was not raised for unsupported file type"
+    except ValueError as e:
+        assert "Unsupported file type" in str(e) 

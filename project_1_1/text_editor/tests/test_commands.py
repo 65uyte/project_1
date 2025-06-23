@@ -126,3 +126,13 @@ def test_set_text_command_same_content():
     assert doc.content == "Test"
     cmd.undo()
     assert doc.content == "Test"  # Повертається до оригіналу 
+
+def test_command_protocol_methods():
+    class DummyCommand:
+        def execute(self):
+            return "executed"
+        def undo(self):
+            return "undone"
+    cmd = DummyCommand()
+    assert cmd.execute() == "executed"
+    assert cmd.undo() == "undone" 
