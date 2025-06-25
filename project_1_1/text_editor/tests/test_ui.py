@@ -4,6 +4,9 @@ import pytest
 import sys
 import types
 from unittest.mock import patch, MagicMock
+import tempfile
+import os
+from text_editor.document.decorators import AutoSaveDecorator
 
 def test_facade_basic_operations():
     facade = EditorFacade()
@@ -49,4 +52,21 @@ def test_editor_window_init():
         from text_editor.ui.editor_window import EditorWindow
         win = EditorWindow(root)
         assert hasattr(win, 'facade')
-        assert hasattr(win, 'text') 
+        assert hasattr(win, 'text')
+
+def test_new_file_creates_file_and_autosaves(monkeypatch):
+    from text_editor.ui.editor_window import EditorWindow
+    class DummyRoot:
+        def __init__(self):
+            self.protocol = lambda *a, **k: None
+            self.title = lambda *a, **k: None
+            self.destroy = lambda: None
+    root = DummyRoot()
+    win = EditorWindow(root)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        fname = os.path.join(tmpdir, "testfile.txt")
+        win.current_file_path = fname
+        win.facade.document = AutoSaveDecorator(win.facade.factory.create_document("", filetype=".txt"), win.auto_save_callback)
+        win.facade.document.content = "Hello autosave!"
+        with open(fname, 'r', encoding='utf-8') as f:
+            assert f.read() == "Hello autosave!" 
