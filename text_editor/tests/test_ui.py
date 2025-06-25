@@ -61,12 +61,15 @@ def test_new_file_creates_file_and_autosaves(monkeypatch):
             self.protocol = lambda *a, **k: None
             self.title = lambda *a, **k: None
             self.destroy = lambda: None
-    root = DummyRoot()
-    win = EditorWindow(root)
-    with tempfile.TemporaryDirectory() as tmpdir:
-        fname = os.path.join(tmpdir, "testfile.txt")
-        win.current_file_path = fname
-        win.facade.document = AutoSaveDecorator(win.facade.factory.create_document("", filetype=".txt"), win.auto_save_callback)
-        win.facade.document.content = "Hello autosave!"
-        with open(fname, 'r', encoding='utf-8') as f:
-            assert f.read() == "Hello autosave!" 
+            self.config = lambda *a, **k: None
+
+    with patch("text_editor.ui.editor_window.tk.Text", MagicMock()):
+        root = DummyRoot()
+        win = EditorWindow(root)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            fname = os.path.join(tmpdir, "testfile.txt")
+            win.current_file_path = fname
+            win.facade.document = AutoSaveDecorator(win.facade.factory.create_document("", filetype=".txt"), win.auto_save_callback)
+            win.facade.document.content = "Hello autosave!"
+            with open(fname, 'r', encoding='utf-8') as f:
+                assert f.read() == "Hello autosave!" 

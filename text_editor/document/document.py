@@ -1,4 +1,5 @@
 from typing import List, Protocol
+from .observer import DocumentObserver
 
 class Observer(Protocol):
     def update(self, content: str):
