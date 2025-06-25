@@ -1,0 +1,6 @@
+self ("e)
+'
+ ("#get-field# document:(
+&
+ ($"#get-field# content:
+ ($*CC:\Users\acer\Desktop\project_1\text_editor\facade\editor_facade.py

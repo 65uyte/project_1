@@ -1,0 +1,52 @@
+
+6text_editor.commands.undo_redo.UndoRedoManager.executeK
+AC:\Users\acer\Desktop\project_1\text_editor\commands\undo_redo.py ("2*ö
+2	 	(DB
+	 	(
+%1*'
+
+__unknown_file (
+	
+command2executey
+w
+
+ 
+(
+%2"__id*_
+
+__unknown_file (C*A0
+.text_editor.commands.undo_redo.UndoRedoManager"
+_undo_stackge
+
+ 
+((
+%3*"
+
+__unknown_file (
+
+%2*'
+
+__unknown_file (
+	
+command2appendy
+w
+ (
+%4"__id*_
+
+__unknown_file (C*A0
+.text_editor.commands.undo_redo.UndoRedoManager"
+_redo_stack=;
+ ( 
+%5*"
+
+__unknown_file (
+
+%42clear*
+3*2
+3
+undo_redo.py"
+ (
+implicit return:
+ (&	
+commandB20
+.text_editor.commands.undo_redo.UndoRedoManagerH

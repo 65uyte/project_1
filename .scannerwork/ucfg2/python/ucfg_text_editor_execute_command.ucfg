@@ -1,0 +1,62 @@
+
+&text_editor.TextEditor.execute_command:
+.C:\Users\acer\Desktop\project_1\text_editor.pyÎ Î("2*Ò
+2
+Ï Ï(3ca
+
+Ð Ð(
+%1"text_editor.Command.execute*'
+
+__unknown_file (
+	
+command2executeg
+e
+
+Ñ Ñ(
+%2"__id*K
+
+__unknown_file (/*-
+text_editor.TextEditor"
+command_historyig
+
+Ñ Ñ(,
+%3*"
+
+__unknown_file (
+
+%2*'
+
+__unknown_file (
+	
+command2appendb
+`
+
+Ò Ò(
+%4"__id*F
+
+__unknown_file (**(
+text_editor.TextEditor"
+
+redo_stack?=
+
+Ò Ò(
+%5*"
+
+__unknown_file (
+
+%42clear^\
+
+Ó Ó(
+%6*6
+
+__unknown_file (
+text_editor.TextEditor2update_text_area*
+3*6
+3
+text_editor.py"
+Õ Õ(
+implicit return:
+
+Î Î(.	
+commandB
+text_editor.TextEditorH

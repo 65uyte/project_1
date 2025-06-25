@@ -1,0 +1,76 @@
+
+/text_editor.ui.editor_window.EditorWindow.pasteI
+?C:\Users\acer\Desktop\project_1\text_editor\ui\editor_window.py6 6("2*Ó
+28 8(6m
+k
+8 8(&
+%2"__id*S
+
+__unknown_file (7*5+
+)text_editor.ui.editor_window.EditorWindow"
+rootEC
+8 8(6
+%3*"
+
+__unknown_file (
+
+%22clipboard_getH
+F
+8 8(6
+clipboard_text"__id*"
+
+__unknown_file (
+
+%3m
+k
+9 9(
+%4"__id*S
+
+__unknown_file (7*5+
+)text_editor.ui.editor_window.EditorWindow"
+textH
+F
+9 9(&
+%5"__id*.
+
+__unknown_file (*
+
+tk"
+INSERT“
+9 9(7
+%6*"
+
+__unknown_file (
+
+%4*"
+
+__unknown_file (
+
+%5*.
+
+__unknown_file (
+
+clipboard_text2insertmk
+: :(!
+%7*I
+
+__unknown_file (-+
+)text_editor.ui.editor_window.EditorWindow2on_text_change*
+3
+5*6
+3
+editor_window.py"
+> >(
+implicit return*^
+5; ;(J
+H
+; ;(
+%1"__id*0
+
+__unknown_file (*
+
+tk"
+
+TclError*
+3B-+
+)text_editor.ui.editor_window.EditorWindowH
