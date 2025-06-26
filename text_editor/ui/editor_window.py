@@ -1,9 +1,15 @@
 import tkinter as tk
 from text_editor.facade.editor_facade import EditorFacade
-from tkinter import filedialog, messagebox
+from tkinter import messagebox
 from text_editor.commands.command import SetTextCommand
 import os
-from text_editor.document.decorators import AutoSaveDecorator
+from text_editor.document.decorators import (
+    AutoSaveDecorator, ValidationDecorator, 
+    EncryptionDecorator, StatisticsDecorator,
+    save_decorators_metadata, load_decorators_metadata, 
+    create_decorator_chain, collect_decorators_metadata,
+    cleanup_orphaned_metadata
+)
 
 class EditorWindow:
     def __init__(self, root):
@@ -12,6 +18,8 @@ class EditorWindow:
         self.current_file_path = None
         self.last_text = ""
         self.facade = EditorFacade(self.auto_save_callback)
+
+        cleanup_orphaned_metadata()
 
         self.text = tk.Text(root, wrap="word")
         self.text.pack(expand=1, fill="both")
@@ -40,16 +48,22 @@ class EditorWindow:
         content = self.text.get("1.0", tk.END)[:-1]
         if content != self.last_text:
             cmd = SetTextCommand(self.facade.document, content)
-            self.facade.undo_redo.execute(cmd)
-            self.last_text = content
+            try:
+                self.facade.undo_redo.execute(cmd)
+                self.last_text = content
+            except ValueError as e:
+                messagebox.showerror("Validation Error", str(e))
+                self.text.delete("1.0", tk.END)
+                self.text.insert("1.0", self.last_text)
 
     def copy(self):
         try:
             selected = self.text.get(tk.SEL_FIRST, tk.SEL_LAST)
             self.root.clipboard_clear()
             self.root.clipboard_append(selected)
+            self.root.update()
         except tk.TclError:
-            pass  # Нічого не виділено
+            pass
 
     def paste(self):
         try:
@@ -57,7 +71,7 @@ class EditorWindow:
             self.text.insert(tk.INSERT, clipboard_text)
             self.on_text_change()
         except tk.TclError:
-            pass  # Буфер порожній
+            pass
 
     def undo(self):
         self.facade.undo()
@@ -80,7 +94,6 @@ class EditorWindow:
                 messagebox.showerror("Error", f"Could not auto-save file: {e}")
 
     def open_file(self):
-        # Власний інтерфейс відкривання
         open_win = tk.Toplevel(self.root)
         open_win.title("Open File")
         tk.Label(open_win, text="Directory:").pack(padx=10, pady=(10, 0))
@@ -141,7 +154,6 @@ class EditorWindow:
                 messagebox.showerror("Error", "Invalid directory.")
                 return
             fname = os.path.join(directory, name)
-            # Визначаємо тип по розширенню, якщо вибрано all
             if ext == 'all':
                 ext = os.path.splitext(fname)[1].lower()
                 if ext not in ['.txt', '.md', '.rtf', '.html']:
@@ -150,17 +162,68 @@ class EditorWindow:
                 fname += ext
             try:
                 self.current_file_path = fname
-                self.facade.document = AutoSaveDecorator(self.facade.factory.create_document("", filetype=ext), self.auto_save_callback)
-                self.facade.open_from_file(fname)
-                self.text.delete("1.0", tk.END)
-                self.text.insert("1.0", self.facade.get_content())
-                open_win.destroy()
+
+                decorators_metadata = load_decorators_metadata(fname)
+                print(f"Loaded decorators metadata: {decorators_metadata}")
+                print(f"Metadata stored in: D:\\Documents\\Data")
+                
+                encryption_key = None
+                has_encryption = any(d.get("type") == "Encryption" for d in decorators_metadata)
+                print(f"Has encryption: {has_encryption}")
+                
+                if has_encryption:
+                    print("Showing password dialog...")
+                    password_win = tk.Toplevel(open_win)
+                    password_win.title("Enter Encryption Key")
+                    password_win.geometry("300x150")
+                    password_win.transient(open_win)
+                    password_win.grab_set()
+                    
+                    tk.Label(password_win, text="This file is encrypted.\nEnter the encryption key:").pack(pady=10)
+                    password_var = tk.StringVar()
+                    password_entry = tk.Entry(password_win, textvariable=password_var, show="*", width=30)
+                    password_entry.pack(pady=5)
+                    password_entry.focus()
+                    
+                    def confirm_password():
+                        nonlocal encryption_key
+                        encryption_key = password_var.get()
+                        password_win.destroy()
+                    
+                    def cancel_password():
+                        password_win.destroy()
+                        return
+                    
+                    tk.Button(password_win, text="OK", command=confirm_password).pack(side='left', padx=20, pady=10)
+                    tk.Button(password_win, text="Cancel", command=cancel_password).pack(side='right', padx=20, pady=10)
+                    
+                    open_win.wait_window(password_win)
+                    
+                    if encryption_key is None:
+                        return
+                else:
+                    print("No encryption detected, skipping password dialog")
+                
+                doc = self.facade.factory.create_document("", filetype=ext)
+                decorated_doc = create_decorator_chain(
+                    doc, decorators_metadata, 
+                    self.auto_save_callback, encryption_key
+                )
+                
+                try:
+                    self.facade.document = decorated_doc
+                    self.facade.open_from_file(fname)
+                    self.text.delete("1.0", tk.END)
+                    self.text.insert("1.0", self.facade.get_content())
+                    open_win.destroy()
+                except ValueError as e:
+                    messagebox.showerror("Error", str(e))
+                    return
             except Exception as e:
                 messagebox.showerror("Error", f"Could not open file: {e}")
         tk.Button(open_win, text="Open", command=openf).pack(pady=10)
 
     def save_file(self):
-        # Власний інтерфейс збереження з вибором шляху
         save_win = tk.Toplevel(self.root)
         save_win.title("Save File")
         tk.Label(save_win, text="Directory:").pack(padx=10, pady=(10, 0))
@@ -216,7 +279,13 @@ class EditorWindow:
             fname = os.path.join(directory, f"{name}{ext}")
             try:
                 self.current_file_path = fname
-                self.facade.document = AutoSaveDecorator(self.facade.factory.create_document(self.text.get("1.0", tk.END)[:-1], filetype=ext), self.auto_save_callback)
+                
+                doc = self.facade.factory.create_document(self.text.get("1.0", tk.END)[:-1], filetype=ext)
+                
+                if hasattr(self.facade.document, 'get_metadata'):
+                    decorators_metadata = collect_decorators_metadata(self.facade.document)
+                    save_decorators_metadata(fname, decorators_metadata)
+                
                 self.facade.save_to_file(fname)
                 save_win.destroy()
             except Exception as e:
@@ -224,9 +293,9 @@ class EditorWindow:
         tk.Button(save_win, text="Save", command=save).pack(pady=10)
 
     def new_file(self):
-        # Діалог вибору імені та шляху нового файлу (аналогічно save_file)
         new_win = tk.Toplevel(self.root)
         new_win.title("New File")
+        
         tk.Label(new_win, text="Directory:").pack(padx=10, pady=(10, 0))
         dir_var = tk.StringVar(value="D:\\Documents")
         dir_frame = tk.Frame(new_win)
@@ -238,37 +307,93 @@ class EditorWindow:
             if d:
                 dir_var.set(d)
         tk.Button(dir_frame, text="Browse...", command=browse_dir).pack(side='left', padx=5)
+        
         tk.Label(new_win, text="File name:").pack(padx=10, pady=(10, 0))
         filename_var = tk.StringVar()
         entry = tk.Entry(new_win, textvariable=filename_var, width=30)
         entry.pack(padx=10, pady=5)
+        
         tk.Label(new_win, text="File type:").pack(padx=10, pady=(10, 0))
         filetype_var = tk.StringVar(value=".txt")
         types = [('.txt', 'Text File'), ('.md', 'Markdown'), ('.rtf', 'Rich Text'), ('.html', 'HTML')]
         for ext, label in types:
             tk.Radiobutton(new_win, text=label, variable=filetype_var, value=ext).pack(anchor='w', padx=20)
+        
+        tk.Label(new_win, text="Decorators:").pack(padx=10, pady=(10, 0))
+        
+        auto_save_var = tk.BooleanVar(value=True)
+        validation_var = tk.BooleanVar()
+        encryption_var = tk.BooleanVar()
+        statistics_var = tk.BooleanVar()
+        
+        tk.Checkbutton(new_win, text="Auto Save", variable=auto_save_var).pack(anchor='w', padx=20)
+        tk.Checkbutton(new_win, text="Validation", variable=validation_var).pack(anchor='w', padx=20)
+        tk.Checkbutton(new_win, text="Encryption", variable=encryption_var).pack(anchor='w', padx=20)
+        tk.Checkbutton(new_win, text="Statistics", variable=statistics_var).pack(anchor='w', padx=20)
+        
+        decorator_frame = tk.Frame(new_win)
+        decorator_frame.pack(padx=10, pady=5, fill='x')
+        
+        max_length_var = tk.StringVar(value="10000")
+        validation_label = tk.Label(decorator_frame, text="Max length:")
+        validation_label.pack(anchor='w')
+        validation_entry = tk.Entry(decorator_frame, textvariable=max_length_var, width=10)
+        validation_entry.pack(anchor='w', padx=20)
+        
+        encryption_key_var = tk.StringVar(value="default_key")
+        encryption_label = tk.Label(decorator_frame, text="Encryption key:")
+        encryption_label.pack(anchor='w')
+        encryption_entry = tk.Entry(decorator_frame, textvariable=encryption_key_var, width=20)
+        encryption_entry.pack(anchor='w', padx=20)
+        
         def create():
             name = filename_var.get().strip()
             ext = filetype_var.get()
             directory = dir_var.get()
+            
             if not name:
                 messagebox.showerror("Error", "Please enter file name.")
                 return
             if not os.path.isdir(directory):
                 messagebox.showerror("Error", "Invalid directory.")
                 return
+                
             fname = os.path.join(directory, f"{name}{ext}")
+            
             try:
-                # Створюємо порожній файл
                 with open(fname, 'w', encoding='utf-8') as f:
                     f.write("")
+                
                 self.current_file_path = fname
-                self.facade.document = AutoSaveDecorator(self.facade.factory.create_document("", filetype=ext), self.auto_save_callback)
+                
+                doc = self.facade.factory.create_document("", filetype=ext)
+                decorated_doc = doc
+                
+                if auto_save_var.get():
+                    decorated_doc = AutoSaveDecorator(decorated_doc, self.auto_save_callback)
+                
+                if validation_var.get():
+                    max_length = int(max_length_var.get()) if max_length_var.get().isdigit() else 10000
+                    decorated_doc = ValidationDecorator(decorated_doc, max_length)
+                
+                if encryption_var.get():
+                    decorated_doc = EncryptionDecorator(decorated_doc, encryption_key_var.get())
+                
+                if statistics_var.get():
+                    decorated_doc = StatisticsDecorator(decorated_doc)
+                
+                self.facade.document = decorated_doc
+                decorators_metadata = collect_decorators_metadata(decorated_doc)
+                save_decorators_metadata(fname, decorators_metadata)
+                print(f"Saved decorators metadata: {decorators_metadata}")
+                print(f"Metadata stored in: D:\\Documents\\Data")
                 self.text.delete("1.0", tk.END)
                 self.last_text = ""
                 new_win.destroy()
+                
             except Exception as e:
                 messagebox.showerror("Error", f"Could not create file: {e}")
+        
         tk.Button(new_win, text="Create", command=create).pack(pady=10)
 
     def on_close(self):

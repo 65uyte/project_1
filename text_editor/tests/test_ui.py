@@ -62,8 +62,9 @@ def test_new_file_creates_file_and_autosaves(monkeypatch):
             self.title = lambda *a, **k: None
             self.destroy = lambda: None
             self.config = lambda *a, **k: None
-
-    with patch("text_editor.ui.editor_window.tk.Text", MagicMock()):
+    
+    with patch("text_editor.ui.editor_window.tk.Text", MagicMock()), \
+         patch("text_editor.ui.editor_window.tk.Menu", MagicMock()):
         root = DummyRoot()
         win = EditorWindow(root)
         with tempfile.TemporaryDirectory() as tmpdir:

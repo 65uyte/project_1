@@ -3,7 +3,7 @@ from text_editor.document.observer import DocumentObserver, PrintObserver, FileL
 
 def test_document_observer_prints(capsys):
     doc = Document()
-    obs = DocumentObserver()
+    obs = PrintObserver()
     doc.attach(obs)
     doc.content = "new text"
     captured = capsys.readouterr()

@@ -7,7 +7,7 @@ class DocumentObserver(ABC):
 
 class PrintObserver(DocumentObserver):
     def update(self, content: str):
-        print(f"Document updated: {content}")
+        print(f"Document updated: {content}") 
 
 class FileLogObserver(DocumentObserver):
     def __init__(self, filepath):
